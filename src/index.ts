@@ -4,6 +4,7 @@ import 'dotenv/config';
 import bodyParser from 'body-parser';
 
 import * as userRoutes from './routes/user';
+import * as expRoutes from './routes/expense';
 
 const app = express();
 const port = process.env.PORT || 5050;
@@ -15,6 +16,8 @@ if (mongoDbUrl === "") {
 app.use(bodyParser.json());
 
 app.use('/user', userRoutes.router);
+
+app.use('/expense', expRoutes.router);
 
 app.get('/', (req, res, next) => {
     res.send("Hello, world!");

@@ -1,11 +1,14 @@
 import mongoose from 'mongoose';
+
+import { ExpenseTypeEnum } from './ExpenseModels';
+
 const Schema = mongoose.Schema;
 
 export interface IExpense extends mongoose.Document {
     date: Date;
     amount: number;
-    type: string;
-    vendor: string;
+    type: ExpenseTypeEnum;
+    userId: string;
 }
 
 export const expenseSchema = new Schema({
@@ -13,7 +16,7 @@ export const expenseSchema = new Schema({
         type: Date,
         required: true,
     },
-    amount:{
+    amount: {
         type: Number,
         required: true,
     },
@@ -21,7 +24,7 @@ export const expenseSchema = new Schema({
         type: String,
         required: true,
     },
-    vendor: {
+    userId: {
         type: String,
         required: true,
     }
