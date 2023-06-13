@@ -6,13 +6,6 @@ import { Types } from 'mongoose';
 
 export const postExpense = async (req: Request, res: Response, next: any) => {
     try {
-        if (!req.body) {
-            throw new ResponseError(
-                ResponseCode.BadRequest,
-                "Invalid request body"
-            )
-        }
-        const expenseModel: ExpenseModel = new ExpenseModel(req.body);
         const userId: string | undefined = req.get('userId');
 
         if (!userId) {
@@ -21,6 +14,14 @@ export const postExpense = async (req: Request, res: Response, next: any) => {
                 "Unauthorized"
             );
         }
+
+        if (!req.body) {
+            throw new ResponseError(
+                ResponseCode.BadRequest,
+                "Invalid request body"
+            )
+        }
+        const expenseModel: ExpenseModel = new ExpenseModel(req.body);
 
         expenseModel.setUserId(userId);
         const expense: IExpense & {
@@ -36,7 +37,7 @@ export const postExpense = async (req: Request, res: Response, next: any) => {
 export const getAllExpenses = async (req: Request, res: Response, next: any) => {
     try {
         const userId: string | undefined = req.get('userId');
-        if (!req.get('userId')) {
+        if (userId === undefined) {
             throw new ResponseError(
                 ResponseCode.Unauthorized,
                 'Unauthorized'
@@ -53,6 +54,37 @@ export const getAllExpenses = async (req: Request, res: Response, next: any) => 
         } else {
             res.status(ResponseCode.NoContent).json({ message: "No Expenses found" });
         }
+    } catch (err) {
+        next(err);
+    }
+}
+
+export const getExpenseById = async (req: Request, res: Response, next: any) => {
+    try {
+        const userId: string | undefined = req.get('userId');
+        if (userId === undefined) {
+            throw new ResponseError(
+                ResponseCode.Unauthorized,
+                'Unauthorized'
+            );
+        }
+        const expenseId: string | undefined = req.params.expenseId;
+        if (expenseId === undefined) {
+            throw new ResponseError(
+                ResponseCode.BadRequest,
+                "No expense Id provided"
+            );
+        }
+
+        const expenses = await Expense.find({ userId: userId });
+        const expense = expenses.find(exp => exp._id == expenseId);
+        if (expense === undefined) {
+            throw new ResponseError(
+                ResponseCode.NotFound,
+                `Unable to find expense for id: ${expenseId}`
+            );
+        }
+        res.status(ResponseCode.OK).json({ message: 'Expense found', result: expense });
     } catch (err) {
         next(err);
     }
